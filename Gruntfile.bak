@@ -1,0 +1,266 @@
+/*global module:false*/
+module.exports = function(grunt) {
+
+  // Project configuration.
+  grunt.initConfig({
+    // Metadata.
+    pkg: grunt.file.readJSON('package.json'),
+    banner: '/*! <%= pkg.title || pkg.name %> - v<%= pkg.version %> - ' +
+      '<%= grunt.template.today("yyyy-mm-dd") %>\n' +
+      '<%= pkg.homepage ? "* " + pkg.homepage + "\\n" : "" %>' +
+      '* Copyright (c) <%= grunt.template.today("yyyy") %> <%= pkg.author.name %>;' +
+      ' Licensed <%= _.pluck(pkg.licenses, "type").join(", ") %> */\n',
+    // Task configuration.
+    clean: ["dist/*", "build/*"],
+    
+    // Checking JS, CSS, HTML for errors.
+    jshint: {
+      options: {
+        curly: true,
+        eqeqeq: true,
+        immed: true,
+        latedef: true,
+        newcap: true,
+        noarg: true,
+        sub: true,
+        undef: true,
+        unused: true,
+        boss: true,
+        eqnull: true,
+        browser: true,
+        globals: {}
+      },
+      gruntfile: {
+        src: 'Gruntfile.js'
+      },
+      dev: {
+        src: ['js/*.js']
+      },
+      build: {
+        src: ['build/js/**/*.js']
+      },
+      dist: {
+        src: ['dist/js/**/*.js']
+      }
+    },
+    csslint: {
+      build: {
+        src: ['build/css/*.css']
+      },
+      dist: {
+        src: ['dist/css/*.css']
+      },
+      dev: {
+        options: {
+          csslintrc: '.csslintrc'
+        },
+        src: ['css/*.css']
+      }
+    },
+    htmlhint: {
+      build: {
+          options: {
+              'tag-pair': true,
+              'tagname-lowercase': true,
+              'attr-lowercase': true,
+              'attr-value-double-quotes': true,
+              'doctype-first': true,
+              'spec-char-escape': true,
+              'id-unique': true,
+              'head-script-disabled': true,
+              'style-disabled': true,
+              'head-script-disabled': true,
+              'img-alt-require': true,
+              'doctype-html5': true,
+              'attr-unsafe-chars': true
+          },
+          src: ['build/**/*.html']
+      },
+      dist: {
+          options: {
+              'tag-pair': true,
+              'tagname-lowercase': true,
+              'attr-lowercase': true,
+              'attr-value-double-quotes': true,
+              'doctype-first': true,
+              'spec-char-escape': true,
+              'id-unique': true,
+              'head-script-disabled': true,
+              'style-disabled': true,
+              'head-script-disabled': true,
+              'img-alt-require': true,
+              'doctype-html5': true,
+              'attr-unsafe-chars': true
+          },
+          src: ['dist/**/*.html']
+      },
+      dev: {
+          options: {
+              'tag-pair': true,
+              'tagname-lowercase': true,
+              'attr-lowercase': true,
+              'attr-value-double-quotes': true,
+              'doctype-first': true,
+              'spec-char-escape': true,
+              'id-unique': true,
+              'head-script-disabled': true,
+              'style-disabled': true,
+              'head-script-disabled': true,
+              'img-alt-require': true,
+              'doctype-html5': true,
+              'attr-unsafe-chars': true
+          },
+          src: ['**/*.html', '!build/**', '!dist/**', '!node_modules/**']
+      }
+    },
+
+    // Processing JS.
+    concat: {
+      options: {
+        banner: '<%= banner %>',
+        stripBanners: true
+      },
+      dist: {
+        src: ['js/*.js'],
+        dest: 'build/js/<%= pkg.name %>.js'
+      }
+    },
+    uglify: {
+      options: {
+        banner: '<%= banner %>'
+      },
+      dist: {
+        src: '<%= concat.dist.dest %>',
+        dest: 'dist/js/<%= pkg.name %>.min.js'
+      }
+    },
+
+    // Processing images.
+    imagemin: {
+      build: {
+        options: {
+          optimizationLevel: 3
+        },
+        files: [{
+          expand: true,                  // Enable dynamic expansion
+          cwd: 'img/',                   // Src matches are relative to this path
+          src: ['**/*.{png,jpg,gif}'],   // Actual patterns to match
+          dest: 'build/img'              // Destination path prefix
+        }]
+      },
+    },
+
+    // Processing CSS.
+    cssmin: {
+      options: {
+        banner: '<%= banner %>',
+        keepSpecialComments: '0'
+      },
+      build: {
+        expand: true,
+        cwd: 'css/',
+        src: ['*.css', '!*.min.css'],
+        dest: 'build/css/',
+        ext: '.min.css'
+      }
+    },
+
+    // Processing HTML.
+    useminPrepare: {
+      // root: '',
+      dest: 'dist',
+      staging: 'build'
+    },
+    usemin: {
+
+    },
+    htmlmin: {
+      build: {
+        options: {                                 // Target options
+          removeComments: false,                   // Should leave comments for grunt-usemin
+          collapseWhitespace: true,
+          removeAttributeQuotes: true,
+          removeRedundantAttributes: true,
+          useShortDoctype: true,
+          removeEmptyAttributes: true,
+          removeOptionalTags: true
+        },
+        files: [{
+          expand: true,              // Enable dynamic expansion
+          cwd: '',                   // Src matches are relative to this path
+          src: ['*.html'],           // Actual patterns to match; should be taken from output of usemin
+          dest: 'build/'              // Destination path prefix
+        }]
+      },
+      dist: {
+        options: {                                 // Target options
+          removeComments: true,
+          collapseWhitespace: true,
+          removeAttributeQuotes: true,
+          removeRedundantAttributes: true,
+          useShortDoctype: true,
+          removeEmptyAttributes: true,
+          removeOptionalTags: true
+        },
+        files: [{
+          expand: true,              // Enable dynamic expansion
+          cwd: '',                   // Src matches are relative to this path
+          src: ['*.html'],           // Actual patterns to match; should be taken from output of usemin
+          dest: 'dist/'              // Destination path prefix
+        }]
+      }
+    },
+
+    // Building for distribution.
+    copy: {
+      dist: {
+        files: [
+          {expand: true, src: ['_config.yml'], dest: 'dist/', filter: 'isFile'},
+          {expand: true, cwd: 'build/img/', src: ['**'], dest: 'dist/img/'},
+          {expand: true, cwd: 'build/css/', src: ['**'], dest: 'dist/css/'},
+        ]
+      }
+    }
+
+  });
+
+  // These plugins provide necessary tasks.
+  grunt.loadNpmTasks('grunt-contrib-concat');
+  grunt.loadNpmTasks('grunt-contrib-uglify');
+  grunt.loadNpmTasks('grunt-contrib-imagemin');
+  grunt.loadNpmTasks('grunt-contrib-cssmin');
+  grunt.loadNpmTasks('grunt-contrib-htmlmin');
+  grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-contrib-csslint');
+  // grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-contrib-clean');
+  grunt.loadNpmTasks('grunt-contrib-copy');
+  grunt.loadNpmTasks('grunt-htmlhint');
+  grunt.loadNpmTasks('grunt-usemin');
+
+  // Default task.
+  grunt.registerTask('default', 
+    [
+      // Cleanup.
+      'clean', 
+      // Building.
+      'imagemin', 'cssmin', 
+      'concat', 'uglify',
+      'htmlmin:build', 
+      // 'jshint:build',
+      // 'csslint:build',
+      // 'htmlhint:build',
+      // Preparing dist.
+      'uglify',
+      'copy',
+      'htmlmin:dist', 
+      // 'jshint:dist'
+      // 'csslint:dist',
+      // 'htmlhint:dist',
+      // Deploying.
+      // TBD
+    ]
+  );
+  // Check sources.
+  grunt.registerTask('check', ['jshint:dev', 'csslint:build', 'htmlhint:dev']);
+};
